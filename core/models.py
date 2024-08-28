@@ -1,7 +1,8 @@
 import uuid
 import datetime
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Boolean, Column, String, DateTime
+from sqlalchemy import Boolean, Column, String, DateTime, Float, ForeignKey
 
 Base = declarative_base()
 
@@ -27,3 +28,21 @@ class Cat(CoreModel, Base):
 
     name = Column(String, nullable=False)
     nickname = Column(String, nullable=False)
+    owner_id = Column(String, ForeignKey("users.id"))
+    owner = relationship("User", back_populates="cat")
+
+
+class CatWeight(CoreModel, Base):
+    __tablename__ = "catweight"
+
+    weight = Column(Float, nullable=False)
+    cat_id = Column(String, ForeignKey("cat.id"))
+    cat = relationship("Cat", back_populates="catweight")
+
+
+class CatVaccine(CoreModel, Base):
+    __tablename__ = "catvaccine"
+
+    vaccine_name = Column(String, nullable=False)
+    cat_id = Column(String, ForeignKey("cat.id"))
+    cat = relationship("Cat", back_populates="catvaccine")
