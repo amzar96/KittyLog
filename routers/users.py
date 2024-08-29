@@ -1,7 +1,6 @@
 import logging
 from database.db import get_db
 from core import models, schemas
-from sqlalchemy.orm import Session
 from fastapi import APIRouter, HTTPException
 
 logger = logging.getLogger(__name__)
@@ -17,8 +16,12 @@ def get_user_by_username(username: str):
 
 @router.get("/users/{username}", response_model=schemas.UserBase)
 async def get_user(username: str):
-    logger.info(username)
-    return get_user_by_username(username=username)
+    query = get_user_by_username(username=username)
+
+    if query:
+        return query
+    else:
+        raise HTTPException(status_code=404, detail="Data not found")
 
 
 @router.post("/users/", response_model=schemas.UserBase)

@@ -9,6 +9,8 @@ def ResponseModel(data, message):
 
 
 class UserBase(BaseModel):
+    id: str
+    email: str
     username: str
 
     class Config:
@@ -23,6 +25,12 @@ class UserCreate(UserBase):
 class CatBase(BaseModel):
     name: str
     nickname: str
+    owner: UserBase
 
     class Config:
         orm_mode = True
+
+class CatCreate(BaseModel):
+    name: str
+    nickname: str
+    owner_email: str

@@ -1,8 +1,8 @@
 import logging
 from core import models
-from routers import users
 from fastapi import FastAPI
-from database.db import SessionLocal, engine
+from database.db import engine
+from routers import users, cats
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -15,6 +15,7 @@ app = FastAPI(
 )
 
 app.include_router(users.router)
+app.include_router(cats.router)
 
 logging.config.fileConfig("logging.conf", disable_existing_loggers=False)
 logger = logging.getLogger(__name__)

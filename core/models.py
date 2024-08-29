@@ -22,6 +22,8 @@ class User(CoreModel, Base):
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
 
+    cat = relationship("Cat", back_populates="owner")
+
 
 class Cat(CoreModel, Base):
     __tablename__ = "cat"
@@ -30,6 +32,8 @@ class Cat(CoreModel, Base):
     nickname = Column(String, nullable=False)
     owner_id = Column(String, ForeignKey("users.id"))
     owner = relationship("User", back_populates="cat")
+    weights = relationship("CatWeight", back_populates="cat")
+    vaccines = relationship("CatVaccine", back_populates="cat")
 
 
 class CatWeight(CoreModel, Base):
@@ -37,7 +41,7 @@ class CatWeight(CoreModel, Base):
 
     weight = Column(Float, nullable=False)
     cat_id = Column(String, ForeignKey("cat.id"))
-    cat = relationship("Cat", back_populates="catweight")
+    cat = relationship("Cat", back_populates="weights")
 
 
 class CatVaccine(CoreModel, Base):
@@ -45,4 +49,4 @@ class CatVaccine(CoreModel, Base):
 
     vaccine_name = Column(String, nullable=False)
     cat_id = Column(String, ForeignKey("cat.id"))
-    cat = relationship("Cat", back_populates="catvaccine")
+    cat = relationship("Cat", back_populates="vaccines")
