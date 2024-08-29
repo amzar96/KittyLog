@@ -17,7 +17,7 @@ class UserBase(BaseModel):
         orm_mode = True
 
 
-class UserCreate(UserBase):
+class UserCreate(BaseModel):
     email: str
     username: str
 

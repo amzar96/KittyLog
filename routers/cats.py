@@ -10,13 +10,9 @@ router = APIRouter(tags=tags)
 db = get_db()
 
 
-def get_cat_by_name(name: str):
-    return db.query(models.Cat).filter(models.Cat.name == name).first()
-
-
 @router.get("/cats/{name}", response_model=schemas.CatBase)
 async def get_cat(name: str):
-    query = get_cat_by_name(name=name)
+    query = db.query(models.Cat).filter(models.Cat.name == name).first()
 
     if query:
         return query
@@ -26,9 +22,21 @@ async def get_cat(name: str):
 
 @router.post("/cats/", response_model=schemas.CatBase)
 async def create_cat(cat: schemas.CatCreate):
-    query = get_cat_by_name(name=cat.name)
+    user_query = (
+        db.query(models.User).filter(models.User.email == cat.owner_email).first()
+    )
+
+    query = (
+        db.query(models.Cat)
+        .filter(models.Cat.name == cat.name)
+        .filter(models.Cat.owner == user_query)
+        .first()
+    )
     if query:
-        raise HTTPException(status_code=400, detail="Cat already registered")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cat ({cat.name}) already registered under ({cat.owner_email})",
+        )
 
     user = db.query(models.User).filter(models.User.email == cat.owner_email).first()
     query = models.Cat(name=cat.name, nickname=cat.nickname, owner=user)
