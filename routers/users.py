@@ -1,5 +1,5 @@
 import logging
-from database.db import get_db
+from personal.KittyLog.core.db import get_db
 from core import models, schemas
 from fastapi import APIRouter, HTTPException
 

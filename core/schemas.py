@@ -11,7 +11,7 @@ def ResponseModel(data, message):
 class UserBase(BaseModel):
     id: str
     email: str
-    username: str
+    full_name: str
 
     class Config:
         orm_mode = True
@@ -19,7 +19,7 @@ class UserBase(BaseModel):
 
 class UserCreate(BaseModel):
     email: str
-    username: str
+    full_name: str
 
 
 class CatBase(BaseModel):

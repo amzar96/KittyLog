@@ -19,7 +19,7 @@ class CoreModel:
 class User(CoreModel, Base):
     __tablename__ = "users"
 
-    username = Column(String, unique=True, index=True)
+    full_name = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
 
     cat = relationship("Cat", back_populates="owner")

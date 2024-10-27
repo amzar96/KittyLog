@@ -1,7 +1,7 @@
 import logging
 from core import models
 from fastapi import FastAPI
-from database.db import engine
+from personal.KittyLog.core.db import engine
 from config import cfg as CFG
 from routers import users, cats
 from starlette.requests import Request
@@ -52,7 +52,7 @@ async def root():
 @app.get("/")
 def login(request: Request):
     user = request.session.get("user")
-    
+
     if user:
         return RedirectResponse("home")
 
