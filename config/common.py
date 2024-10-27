@@ -1,6 +1,9 @@
 import os
 import configparser
 from config import cfg as CFG
+from core.db import get_db
+
+db = get_db()
 
 
 def home_dir():
@@ -22,3 +25,14 @@ def update_alembic_config():
 
     with open(config_file_path, "w") as configfile:
         config.write(configfile)
+
+
+def add_record(query):
+    try:
+        db.add(query)
+        db.commit()
+        db.refresh(query)
+
+        return True
+    except Exception as e:
+        return False

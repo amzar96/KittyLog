@@ -1,12 +1,12 @@
 import logging
 from core import models
 from fastapi import FastAPI
-from personal.KittyLog.core.db import engine
 from config import cfg as CFG
-from routers import users, cats
+from function import users, cats
 from starlette.requests import Request
-from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from core.db import engine
+from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 from authlib.integrations.starlette_client import OAuth, OAuthError
@@ -21,9 +21,6 @@ app = FastAPI(
     version="0.0.1",
     docs_url="/docs",
 )
-
-app.include_router(users.router)
-app.include_router(cats.router)
 
 app.add_middleware(SessionMiddleware, secret_key="THISisSECRETkey!!^$^**")
 # app.mount("/static", StaticFiles(directory="static"))
@@ -59,6 +56,15 @@ def login(request: Request):
     return templates.TemplateResponse("main.html", {"request": request})
 
 
+@app.get("/home")
+async def home(request: Request):
+    user = request.session.get("user")
+
+    if not user:
+        RedirectResponse("/")
+    return templates.TemplateResponse("home.html", {"request": request, "user": user})
+
+
 @app.get("/login")
 async def login(request: Request):
     url = request.url_for("auth")
@@ -70,6 +76,7 @@ async def auth(request: Request):
     try:
         token = await oauth.google.authorize_access_token(request)
     except OAuthError as e:
+        logger.error(e)
         return templates.TemplateResponse("error.html", {"request": request})
 
     user = token.get("userinfo")
@@ -77,18 +84,12 @@ async def auth(request: Request):
     if user:
         request.session["user"] = dict(user)
 
+        if not users.get_user_by_email(user.email):
+            logger.info("User not exist in db")
+            user = users.create_user(user)
+            logger.info(f"User {user} is now created in db")
+
     return RedirectResponse("home")
-
-
-@app.get("/home")
-async def home(request: Request):
-    user = request.session.get("user")
-
-    if not user:
-        RedirectResponse("/")
-    return templates.TemplateResponse(
-        "home.html", {"request": request, "user": user}
-    )
 
 
 if __name__ == "__main__":
