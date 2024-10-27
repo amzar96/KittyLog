@@ -14,14 +14,46 @@
 
     <div class="ui two item menu">
         <a href="/" class="item"><i class="angle up icon"></i>Home</a>
+
+        {% if not user_login.is_user %}
         <a href="/login" class="item">
             <i class="google icon"></i> Login now!
         </a>
+        {% endif %}
+        {% if user_login.is_user %}
+        <a href="/logout" class="item">
+            Logout
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="ui middle aligned center aligned grid full-height">
+        <div class="column" style="max-width: 450px;">
+            {% if not user_login.is_user %}
+            <h1 class="ui header">Welcome to KittyLog!</h1>
+            
+            <p>Your go-to app for tracking your cat’s health and expenses.</p>
+
+            <div class="ui segment">
+                <h3 class="ui header">About KittyLog</h3>
+                <p>KittyLog helps you track your cat’s weight, vaccination records, and expenses, so you can keep them
+                    happy and healthy.</p>
+            </div>
+
+            
+            <a href="/login" class="ui red google button large fluid">
+                <i class="google icon"></i>
+                Login with Google
+            </a>
+            {% else %}
+            <!-- <h1 class="ui header">Welcome {{user.name}}!</h1> -->
+            <h1 class="ui header">Welcome Back to KittyLog!</h1>
+            {% endif %}
+        </div>
     </div>
 
     {% block content %}
     {% endblock %}
-
 </body>
 
 </html>

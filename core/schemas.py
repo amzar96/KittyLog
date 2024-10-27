@@ -33,4 +33,3 @@ class CatBase(BaseModel):
 class CatCreate(BaseModel):
     name: str
     nickname: str
-    owner_email: str

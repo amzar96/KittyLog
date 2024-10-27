@@ -1,5 +1,46 @@
 {% extends "home-layout.html" %}
 
 {% block content %}
-<h2><img src={{user.picture}}> Welcome {{user.name}}!</h2>
+
+<!-- Main Centered Container -->
+<div class="ui middle aligned center aligned grid full-height">
+    <div class="column" style="max-width: 450px;">
+        <!-- Welcome Section -->
+
+        <p>We're glad to see you again! Ready to track your cat's health?</p>
+
+        <!-- Cats Table -->
+        <table class="ui celled table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Weight</th>
+                </tr>
+            </thead>
+            <tbody id="catsTableBody">
+                <!-- Cat rows will be inserted here -->
+            </tbody>
+        </table>
+
+        <!-- Add Cat Button -->
+        <div style="margin-top: 20px;">
+            <form class="ui form" method="post" action="/add-cat">
+                <div class="field">
+                    <label>Name</label>
+                    <input type="text" name="name" placeholder="Cat's Name" required>
+                </div>
+    
+                <div class="field">
+                    <label>Nickname</label>
+                    <input type="text" name="nickname" placeholder="Cat's Nickname" required>
+                </div>
+    
+                <button type="submit" class="ui blue button fluid">Add Cat</button>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+</div>
 {% endblock %}

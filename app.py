@@ -1,11 +1,13 @@
 import logging
 from core import models
-from fastapi import FastAPI
+from core.db import engine
+from fastapi import FastAPI, Form
+from typing import Annotated
 from config import cfg as CFG
 from function import users, cats
+from core.schemas import CatCreate
 from starlette.requests import Request
 from fastapi.staticfiles import StaticFiles
-from core.db import engine
 from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
@@ -47,13 +49,15 @@ async def root():
 
 
 @app.get("/")
-def login(request: Request):
+def main(request: Request):
     user = request.session.get("user")
 
     if user:
         return RedirectResponse("home")
 
-    return templates.TemplateResponse("main.html", {"request": request})
+    return templates.TemplateResponse(
+        "main.html", {"request": request, "user_login": {"is_user": user}}
+    )
 
 
 @app.get("/home")
@@ -62,7 +66,9 @@ async def home(request: Request):
 
     if not user:
         RedirectResponse("/")
-    return templates.TemplateResponse("home.html", {"request": request, "user": user})
+    return templates.TemplateResponse(
+        "home.html", {"request": request, "user": user, "user_login": {"is_user": user}}
+    )
 
 
 @app.get("/login")
@@ -71,18 +77,28 @@ async def login(request: Request):
     return await oauth.google.authorize_redirect(request, url)
 
 
+@app.get("/logout")
+async def logout(request: Request):
+    request.session.pop("user")
+    return templates.TemplateResponse(
+        "main.html", {"request": request, "user_login": {"is_user": None}}
+    )
+
+
 @app.get("/auth")
 async def auth(request: Request):
     try:
         token = await oauth.google.authorize_access_token(request)
     except OAuthError as e:
         logger.error(e)
-        return templates.TemplateResponse("error.html", {"request": request})
+        return templates.TemplateResponse(
+            "error.html", {"request": request, "user_login": {"is_user": user}}
+        )
 
     user = token.get("userinfo")
 
     if user:
-        request.session["user"] = dict(user)
+        request.session["user"] = user
 
         if not users.get_user_by_email(user.email):
             logger.info("User not exist in db")
@@ -90,6 +106,23 @@ async def auth(request: Request):
             logger.info(f"User {user} is now created in db")
 
     return RedirectResponse("home")
+
+
+@app.post("/add-cat")
+async def add_cat(request: Request, name: str = Form(...), nickname: str = Form(...)):
+    user = request.session.get("user")
+    user = users.get_user_by_email(user.email)
+
+    try:
+        cat = cats.create_cat(name, nickname, user)
+        logger.info(f"Cat {cat.name} is now created in db")
+
+        return templates.TemplateResponse(
+            "home.html",
+            {"request": request, "user": user, "user_login": {"is_user": user}},
+        )
+    except Exception as e:
+        logger.error(e)
 
 
 if __name__ == "__main__":
