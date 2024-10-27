@@ -80,9 +80,7 @@ async def login(request: Request):
 @app.get("/logout")
 async def logout(request: Request):
     request.session.pop("user")
-    return templates.TemplateResponse(
-        "main.html", {"request": request, "user_login": {"is_user": None}}
-    )
+    return RedirectResponse("/")
 
 
 @app.get("/auth")
