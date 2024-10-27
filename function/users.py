@@ -29,7 +29,7 @@ def create_user(user: dict):
 
     try:
         query = models.User(email=email, full_name=full_name)
-        logger.info(query)
+        logger.info(f"User to be created - {query.email}")
         common.add_record(query)
         
         return query
