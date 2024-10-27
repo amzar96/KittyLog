@@ -25,7 +25,7 @@ app = FastAPI(
 app.include_router(users.router)
 app.include_router(cats.router)
 
-app.add_middleware(SessionMiddleware, secret_key="ajajsyhhd")
+app.add_middleware(SessionMiddleware, secret_key="THISisSECRETkey!!^$^**")
 # app.mount("/static", StaticFiles(directory="static"))
 
 oauth = OAuth()
@@ -36,7 +36,7 @@ oauth.register(
     client_secret=CFG.CLIENT_SECRET,
     client_kwargs={
         "scope": "email openid profile",
-        "redirect_url": "https://localhost:8000/auth",
+        "redirect_url": CFG.CLIENT_REDIRECT_URL,
     },
 )
 
@@ -52,11 +52,11 @@ async def root():
 @app.get("/")
 def login(request: Request):
     user = request.session.get("user")
-
+    
     if user:
         return RedirectResponse("home")
 
-    return templates.TemplateResponse("home.html", {"request": request})
+    return templates.TemplateResponse("main.html", {"request": request})
 
 
 @app.get("/login")
