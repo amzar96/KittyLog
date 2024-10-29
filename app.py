@@ -1,12 +1,11 @@
 import logging
 from core import models
 from core.db import engine
-from fastapi import FastAPI, Form
 from typing import Annotated
 from config import cfg as CFG
 from function import users, cats
-from core.schemas import CatCreate
 from starlette.requests import Request
+from fastapi import FastAPI, Form, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse
@@ -62,12 +61,25 @@ def main(request: Request):
 
 @app.get("/home")
 async def home(request: Request):
-    user = request.session.get("user")
-
+    user = request.session.get("user").copy()
+    error_message = request.session.pop("error_message", None)
     if not user:
         RedirectResponse("/")
+
+    cats_list = cats.get_cats_by_owner_email(user.get("email"))
+
+    if cats_list:
+        cats_list = [{"name": cat.name, "age": 2, "weight": 10} for cat in cats_list]
+
     return templates.TemplateResponse(
-        "home.html", {"request": request, "user": user, "user_login": {"is_user": user}}
+        "home.html",
+        {
+            "request": request,
+            "user": user,
+            "user_login": {"is_user": user},
+            "error_message": error_message,
+            "cats": cats_list,
+        },
     )
 
 
@@ -108,19 +120,20 @@ async def auth(request: Request):
 
 @app.post("/add-cat")
 async def add_cat(request: Request, name: str = Form(...), nickname: str = Form(...)):
-    user = request.session.get("user")
-    user = users.get_user_by_email(user.email)
+    user = request.session.get("user").copy()
 
     try:
+        user = users.get_user_by_email(user.get("email"))
         cat = cats.create_cat(name, nickname, user)
         logger.info(f"Cat {cat.name} is now created in db")
 
-        return templates.TemplateResponse(
-            "home.html",
-            {"request": request, "user": user, "user_login": {"is_user": user}},
-        )
     except Exception as e:
         logger.error(e)
+        request.session["error_message"] = (
+            "Cat already registered!" if "already registered" in str(e) else "Error!"
+        )
+
+    return RedirectResponse(url="/home", status_code=status.HTTP_303_SEE_OTHER)
 
 
 if __name__ == "__main__":

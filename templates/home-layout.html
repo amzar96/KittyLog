@@ -47,7 +47,7 @@
             </a>
             {% else %}
             <!-- <h1 class="ui header">Welcome {{user.name}}!</h1> -->
-            <h1 class="ui header">Welcome Back to KittyLog!</h1>
+            <h1 class="ui header">Hey {{ user_login.is_user.name }}, welcome back to KittyLog!</h1>
             {% endif %}
         </div>
     </div>

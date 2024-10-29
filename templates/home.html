@@ -19,23 +19,36 @@
                 </tr>
             </thead>
             <tbody id="catsTableBody">
-                <!-- Cat rows will be inserted here -->
+                {% if cats %}
+                {% for cat in cats %}
+                <tr>
+                    <td>{{ cat.name }}</td>
+                    <td>{{ cat.age }}</td>
+                    <td>{{ cat.weight }} kg</td>
+                </tr>
+                {% endfor %}
+                {% endif %}
             </tbody>
         </table>
 
         <!-- Add Cat Button -->
         <div style="margin-top: 20px;">
+            {% if error_message %}
+            <div class="alert alert-danger">
+                <p style="font-style: italic; color: red;">{{ error_message }}</p>
+            </div>
+            {% endif %}
             <form class="ui form" method="post" action="/add-cat">
                 <div class="field">
                     <label>Name</label>
                     <input type="text" name="name" placeholder="Cat's Name" required>
                 </div>
-    
+
                 <div class="field">
                     <label>Nickname</label>
                     <input type="text" name="nickname" placeholder="Cat's Nickname" required>
                 </div>
-    
+
                 <button type="submit" class="ui blue button fluid">Add Cat</button>
             </form>
         </div>
