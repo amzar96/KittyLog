@@ -161,23 +161,20 @@ async def edit_cat(
 ):
     user = request.session.get("user").copy()
 
-    try:
-        user = users.get_user_by_email(user.get("email"))
-        cats.update_cat(payload, user)
-        logger.info(f"Cat is updated in db")
+    user = users.get_user_by_email(user.get("email"))
+    query = cats.update_cat(payload, user)
 
+    if query:
         return {
             "data": None,
             "message": f"Cat ({payload.name}) is updated in db",
         }
-
-    except Exception as e:
-        logger.error(e)
-        request.session["error_message"] = "Error on updating.. try again"
-
+    else:
+        error_msg = "Error on updating.. try again"
+        request.session["error_message"] = error_msg
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Error on updating.. try again",
+            detail=error_msg,
         )
 
 

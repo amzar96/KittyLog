@@ -67,15 +67,11 @@ def update_cat(payload: schemas.CatCreate, user: models.User):
         payload = payload.copy()
 
         cat = get_cat_by_nickname_name(value=payload.name, _type="name", user=user)
-        logger.info(cat)
-
-        if not cat:
-            return Exception(f"cat name ({payload.name}) not found")
 
         query = (
             db.query(models.Cat)
             .filter(models.Cat.id == cat.id)
-            .update(payload.dict(exclude_unset=True))
+            .update(payload.model_dump(exclude_unset=True))
         )
 
         common.commit_query(query, type_="update")
