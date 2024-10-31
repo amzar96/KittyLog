@@ -22,7 +22,7 @@ target_metadata = Base.metadata
 
 from config import cfg as CFG
 
-config.set_main_option("sqlalchemy.url", CFG.SQLITE_DB_URL)
+config.set_main_option("sqlalchemy.url", CFG.DB_URL)
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

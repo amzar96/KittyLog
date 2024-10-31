@@ -31,7 +31,11 @@ def get_cat_by_nickname_name(value: str, _type: str, user: models.User):
 
 def get_cats_by_owner_email(email: str):
     user = users.get_user_by_email(email)
-    query = db.query(models.Cat).filter(models.Cat.owner == user).all()
+
+    if user:
+        query = db.query(models.Cat).filter(models.Cat.owner == user).all()
+    else:
+        return False
 
     if query:
         logger.info(f"Owner cat is found")
@@ -53,7 +57,10 @@ def create_cat(name: str, nickname: str, dob_date, user: models.User):
 
     try:
         query = models.Cat(name=name, nickname=nickname, dob=dob_date, owner_id=user.id)
-        common.commit_query(query)
+
+        db.add(query)
+        db.commit()
+        db.refresh(query)
 
         logger.info(query)
 
@@ -64,9 +71,10 @@ def create_cat(name: str, nickname: str, dob_date, user: models.User):
 
 def update_cat(payload: schemas.CatUpdate, user: models.User):
     try:
-        payload = payload.copy()
-
         cat = get_cat_by_nickname_name(value=payload.name, _type="name", user=user)
+
+        if not cat:
+            raise Exception(f"Cat ({payload.name}) not exist")
 
         query = (
             db.query(models.Cat)
@@ -74,7 +82,8 @@ def update_cat(payload: schemas.CatUpdate, user: models.User):
             .update(payload.model_dump(exclude_unset=True), synchronize_session=False)
         )
 
-        common.commit_query(query, type_="update")
+        db.commit()
+        db.refresh(query)
 
         return query
     except Exception as e:

@@ -12,7 +12,7 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD")
 DB_NAME = os.environ.get("DB_NAME")
 DB_HOST = os.environ.get("DB_HOST")
 DB_PORT = os.environ.get("DB_PORT")
-SQLITE_DB_URL = os.environ.get("SQLITE_DB_URL")
+DB_URL = os.environ.get("DB_URL")
 
 # google auth
 CLIENT_ID = os.environ.get("CLIENT_ID")
