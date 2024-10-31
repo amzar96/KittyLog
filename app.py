@@ -70,12 +70,6 @@ async def home(request: Request):
 
     cats_list = cats.get_cats_by_owner_email(user.get("email"))
 
-    if cats_list:
-        cats_list = [
-            {"name": cat.name, "nickname": cat.nickname, "dob": cat.dob}
-            for cat in cats_list
-        ]
-
     return templates.TemplateResponse(
         "home.html",
         {
@@ -157,7 +151,7 @@ async def add_cat(
 @app.put("/update-cat", response_model=schemas.ResponseModel)
 async def edit_cat(
     request: Request,
-    payload: schemas.CatCreate,
+    payload: schemas.CatUpdate,
 ):
     user = request.session.get("user").copy()
 

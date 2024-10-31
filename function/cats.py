@@ -62,7 +62,7 @@ def create_cat(name: str, nickname: str, dob_date, user: models.User):
         logger.error(e)
 
 
-def update_cat(payload: schemas.CatCreate, user: models.User):
+def update_cat(payload: schemas.CatUpdate, user: models.User):
     try:
         payload = payload.copy()
 
@@ -71,7 +71,7 @@ def update_cat(payload: schemas.CatCreate, user: models.User):
         query = (
             db.query(models.Cat)
             .filter(models.Cat.id == cat.id)
-            .update(payload.model_dump(exclude_unset=True))
+            .update(payload.model_dump(exclude_unset=True), synchronize_session=False)
         )
 
         common.commit_query(query, type_="update")
