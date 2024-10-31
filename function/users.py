@@ -30,7 +30,7 @@ def create_user(user: dict):
     try:
         query = models.User(email=email, full_name=full_name)
         logger.info(f"User to be created - {query.email}")
-        common.add_record(query)
+        common.commit_query(query)
         
         return query
     except Exception as e:

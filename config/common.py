@@ -27,9 +27,11 @@ def update_alembic_config():
         config.write(configfile)
 
 
-def add_record(query):
+def commit_query(query, type_="add"):
     try:
-        db.add(query)
+        if type_ == "add":
+            db.add(query)
+
         db.commit()
         db.refresh(query)
 

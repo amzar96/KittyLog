@@ -30,6 +30,7 @@ class Cat(CoreModel, Base):
 
     name = Column(String, nullable=False)
     nickname = Column(String, nullable=False)
+    dob = Column(DateTime, nullable=True)
     owner_id = Column(String, ForeignKey("users.id"))
     owner = relationship("User", back_populates="cat")
     weights = relationship("CatWeight", back_populates="cat")

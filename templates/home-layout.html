@@ -7,6 +7,9 @@
     <title>KittyLog</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.css">
     <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+
 </head>
 
 <body>
@@ -31,7 +34,7 @@
         <div class="column" style="max-width: 450px;">
             {% if not user_login.is_user %}
             <h1 class="ui header">Welcome to KittyLog!</h1>
-            
+
             <p>Your go-to app for tracking your cat’s health and expenses.</p>
 
             <div class="ui segment">
@@ -40,7 +43,7 @@
                     happy and healthy.</p>
             </div>
 
-            
+
             <a href="/login" class="ui red google button large fluid">
                 <i class="google icon"></i>
                 Login with Google

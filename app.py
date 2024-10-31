@@ -1,14 +1,16 @@
 import logging
-from core import models
+from core import models, schemas
 from core.db import engine
 from typing import Annotated
+from datetime import datetime
 from config import cfg as CFG
 from function import users, cats
 from starlette.requests import Request
-from fastapi import FastAPI, Form, status
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse
+from fastapi import FastAPI, Form, status, HTTPException
 from starlette.middleware.sessions import SessionMiddleware
 from authlib.integrations.starlette_client import OAuth, OAuthError
 
@@ -69,7 +71,10 @@ async def home(request: Request):
     cats_list = cats.get_cats_by_owner_email(user.get("email"))
 
     if cats_list:
-        cats_list = [{"name": cat.name, "age": 2, "weight": 10} for cat in cats_list]
+        cats_list = [
+            {"name": cat.name, "nickname": cat.nickname, "dob": cat.dob}
+            for cat in cats_list
+        ]
 
     return templates.TemplateResponse(
         "home.html",
@@ -118,22 +123,62 @@ async def auth(request: Request):
     return RedirectResponse("home")
 
 
-@app.post("/add-cat")
-async def add_cat(request: Request, name: str = Form(...), nickname: str = Form(...)):
+@app.post("/add-cat", response_model=schemas.CatBase)
+async def add_cat(
+    request: Request,
+    cat: schemas.CatCreate,
+):
     user = request.session.get("user").copy()
 
     try:
         user = users.get_user_by_email(user.get("email"))
-        cat = cats.create_cat(name, nickname, user)
+
+        cat = cats.create_cat(cat.name, cat.nickname, cat.dob, user)
         logger.info(f"Cat {cat.name} is now created in db")
+
+        return cat
 
     except Exception as e:
         logger.error(e)
-        request.session["error_message"] = (
-            "Cat already registered!" if "already registered" in str(e) else "Error!"
-        )
+        if "already registered" in str(e):
+            request.session["error_message"] = "Cat already registered!"
 
-    return RedirectResponse(url="/home", status_code=status.HTTP_303_SEE_OTHER)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cat already registered!",
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Error while adding cat!",
+            )
+
+
+@app.put("/update-cat", response_model=schemas.ResponseModel)
+async def edit_cat(
+    request: Request,
+    payload: schemas.CatCreate,
+):
+    user = request.session.get("user").copy()
+
+    try:
+        user = users.get_user_by_email(user.get("email"))
+        cats.update_cat(payload, user)
+        logger.info(f"Cat is updated in db")
+
+        return {
+            "data": None,
+            "message": f"Cat ({payload.name}) is updated in db",
+        }
+
+    except Exception as e:
+        logger.error(e)
+        request.session["error_message"] = "Error on updating.. try again"
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Error on updating.. try again",
+        )
 
 
 if __name__ == "__main__":

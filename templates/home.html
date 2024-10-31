@@ -2,58 +2,172 @@
 
 {% block content %}
 
-<!-- Main Centered Container -->
-<div class="ui middle aligned center aligned grid full-height">
-    <div class="column" style="max-width: 450px;">
-        <!-- Welcome Section -->
-
+<div class="ui middle aligned center aligned relaxed grid full-height padded">
+    <div class="sixteen wide column">
         <p>We're glad to see you again! Ready to track your cat's health?</p>
+        <div class="ui divider"></div>
 
-        <!-- Cats Table -->
-        <table class="ui celled table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Age</th>
-                    <th>Weight</th>
-                </tr>
-            </thead>
-            <tbody id="catsTableBody">
-                {% if cats %}
-                {% for cat in cats %}
-                <tr>
-                    <td>{{ cat.name }}</td>
-                    <td>{{ cat.age }}</td>
-                    <td>{{ cat.weight }} kg</td>
-                </tr>
-                {% endfor %}
-                {% endif %}
-            </tbody>
-        </table>
-
-        <!-- Add Cat Button -->
-        <div style="margin-top: 20px;">
-            {% if error_message %}
-            <div class="alert alert-danger">
-                <p style="font-style: italic; color: red;">{{ error_message }}</p>
+        <div class="ui two column stackable grid">
+            <div class="column">
+                <h3 class="ui header"><i class="file alternate icon"></i>Your Cats</h3>
+                <table class="ui celled table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Nickname</th>
+                            <th>Date of Birth</th>
+                            <th>Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="catsTableBody">
+                        {% if cats %}
+                        {% for cat in cats %}
+                        <tr>
+                            <td>{{ cat.name }}</td>
+                            <td>{{ cat.nickname }}</td>
+                            <td>{{ cat.dob.strftime('%Y-%m-%d') if cat.dob else '-' }}</td>
+                            <td>
+                                <button class="ui blue button edit-cat-button" data-id="{{ cat.id }}"
+                                    data-name="{{ cat.name }}" data-nickname="{{ cat.nickname }}"
+                                    data-dob="{{ cat.dob.strftime('%Y-%m-%d') if cat.dob else '' }}">Edit</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table>
             </div>
-            {% endif %}
-            <form class="ui form" method="post" action="/add-cat">
-                <div class="field">
-                    <label>Name</label>
-                    <input type="text" name="name" placeholder="Cat's Name" required>
-                </div>
 
-                <div class="field">
-                    <label>Nickname</label>
-                    <input type="text" name="nickname" placeholder="Cat's Nickname" required>
+            <div class="column">
+                <h3 class="ui header"><i class="plus circle icon"></i>Add a Cat</h3>
+                {% if error_message %}
+                <div class="ui red message">
+                    <p style="font-style: italic;">{{ error_message }}</p>
                 </div>
-
-                <button type="submit" class="ui blue button fluid">Add Cat</button>
-            </form>
+                {% endif %}
+                <form class="ui form" id="addCatForm">
+                    <div class="field">
+                        <label>Name</label>
+                        <input type="text" name="name" placeholder="Cat's Name" required>
+                    </div>
+                    <div class="field">
+                        <label>Nickname</label>
+                        <input type="text" name="nickname" placeholder="Cat's Nickname" required>
+                    </div>
+                    <div class="field">
+                        <label>Date of Birth</label>
+                        <input type="date" name="dob" placeholder="Cat's DOB" required>
+                    </div>
+                    <button type="submit" class="ui blue button fluid">Add Cat</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+<div class="ui modal" id="editCatModal">
+    <i class="close icon"></i>
+    <div class="header">Edit Cat <span id="editCatNameHeader"></span></div>
+    <div class="content">
+        <form class="ui form" id="updateCatForm">
+            <input type="hidden" name="id" id="editCatId">
+            <div class="field">
+                <label>Name</label>
+                <input type="text" name="name" id="editCatName" placeholder="Cat's Name" required>
+            </div>
+            <div class="field">
+                <label>Nickname</label>
+                <input type="text" name="nickname" id="editCatNickname" placeholder="Cat's Nickname" required>
+            </div>
+            <div class="field">
+                <label>Date of Birth</label>
+                <input type="date" name="dob" id="editCatDob" required>
+            </div>
+            <button type="submit" class="ui blue button">Save Changes</button>
+        </form>
+
+    </div>
 </div>
-</div>
+
+<script>
+    document.querySelectorAll('.edit-cat-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const catId = button.getAttribute('data-id');
+            const catName = button.getAttribute('data-name');
+            const catNickname = button.getAttribute('data-nickname');
+            const catDob = button.getAttribute('data-dob');
+
+            document.getElementById('editCatId').value = catId;
+            document.getElementById('editCatName').value = catName;
+            document.getElementById('editCatNickname').value = catNickname;
+            document.getElementById('editCatDob').value = catDob;
+            document.getElementById('editCatNameHeader').textContent = '(' + catName + ')';
+
+            $('#editCatModal').modal('show');
+        });
+    });
+
+    document.getElementById('addCatForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(event.target);
+        const catData = {
+            name: formData.get('name'),
+            nickname: formData.get('nickname'),
+            dob: formData.get('dob'),
+        };
+
+        try {
+            const response = await fetch('/add-cat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(catData),
+            });
+
+            if (!response.ok) {
+                const error = await response.text();
+                console.error('Error:', response.status, error);
+                window.location.reload();
+            }
+            const result = await response.json();
+            window.location.reload();
+        } catch (error) {
+            console.error('Network error:', error);
+        }
+    });
+
+    document.getElementById('updateCatForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(event.target);
+        const catData = {
+            name: formData.get('name'),
+            nickname: formData.get('nickname'),
+            dob: formData.get('dob'),
+        };
+
+        try {
+            const response = await fetch('/update-cat', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(catData),
+            });
+
+            if (!response.ok) {
+                const error = await response.text();
+                console.error('Error:', response.status, error);
+                window.location.reload();
+            }
+            const result = await response.json();
+            window.location.reload();
+        } catch (error) {
+            console.error('Network error:', error);
+        }
+    });
+</script>
+
 {% endblock %}
