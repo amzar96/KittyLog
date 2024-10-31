@@ -63,6 +63,7 @@ def create_cat(name: str, nickname: str, dob_date, user: models.User):
         db.query(models.Cat)
         .filter(models.Cat.name == name)
         .filter(models.Cat.owner == user)
+        .filter(models.Cat.is_deleted == False)
         .first()
     )
 
