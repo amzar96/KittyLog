@@ -47,5 +47,5 @@ class CatUpdate(BaseModel):
 
 class CatDelete(BaseModel):
     name: str
-    is_deleted: bool
+    is_deleted: bool = True
     updated_at: datetime = Field(default_factory=datetime.now)

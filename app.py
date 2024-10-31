@@ -175,6 +175,25 @@ async def edit_cat(
         )
 
 
+@app.delete("/cat/{cat_id}", response_model=schemas.ResponseModel)
+async def delete_cat(request: Request, cat_id: str):
+    cat = cats.get_cat_by_id(value=cat_id)
+    query = cats.delete_cat(cat)
+
+    if query:
+        return {
+            "data": None,
+            "message": f"Cat ({cat_id}) is deleted in db",
+        }
+    else:
+        error_msg = "Error on deleting.. try again"
+        request.session["error_message"] = error_msg
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=error_msg,
+        )
+
+
 if __name__ == "__main__":
     import uvicorn
 

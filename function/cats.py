@@ -1,11 +1,9 @@
 import logging
-from config import common
 from core.db import get_db
 from function import users
+from sqlalchemy import func
 from datetime import datetime
 from core import models, schemas
-from fastapi.encoders import jsonable_encoder
-from fastapi import APIRouter, HTTPException
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +22,16 @@ def get_cat_by_nickname_name(value: str, _type: str, user: models.User):
 
     if query:
         logger.info(f"Cat is found - {query.nickname} {query.owner}")
+        return query
+    else:
+        return False
+
+
+def get_cat_by_id(value: str):
+    query = db.query(models.Cat).filter(models.Cat.id == value).first()
+
+    if query:
+        logger.info(f"Cat is found - {value}")
         return query
     else:
         return False
@@ -86,6 +94,25 @@ def update_cat(payload: schemas.CatUpdate, user: models.User):
             db.query(models.Cat)
             .filter(models.Cat.id == cat.id)
             .update(payload.model_dump(exclude_unset=True), synchronize_session=False)
+        )
+
+        db.commit()
+        db.refresh(cat)
+
+        return query
+    except Exception as e:
+        logger.error(e)
+
+
+def delete_cat(cat: models.Cat):
+    try:
+        query = (
+            db.query(models.Cat)
+            .filter(models.Cat.id == cat.id)
+            .update(
+                {"is_deleted": True, "updated_at": func.now()},
+                synchronize_session=False,
+            )
         )
 
         db.commit()
