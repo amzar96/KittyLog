@@ -83,7 +83,7 @@ def update_cat(payload: schemas.CatUpdate, user: models.User):
         )
 
         db.commit()
-        db.refresh(query)
+        db.refresh(cat)
 
         return query
     except Exception as e:

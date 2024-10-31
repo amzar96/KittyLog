@@ -97,6 +97,7 @@ async def logout(request: Request):
 @app.get("/auth")
 async def auth(request: Request):
     try:
+        logger.info(request)
         token = await oauth.google.authorize_access_token(request)
     except OAuthError as e:
         logger.error(e)
@@ -105,6 +106,8 @@ async def auth(request: Request):
         )
 
     user = token.get("userinfo")
+
+    logger.info(user)
 
     if user:
         request.session["user"] = user

@@ -37,19 +37,9 @@ class CatCreate(BaseModel):
     nickname: str
     dob: datetime
 
-    class Config:
-        orm_mode = True
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True
-
 
 class CatUpdate(BaseModel):
     name: str
     nickname: str
     dob: datetime
     updated_at: datetime = Field(default_factory=datetime.now)
-
-    class Config:
-        orm_mode = True
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True
