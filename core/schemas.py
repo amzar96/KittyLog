@@ -43,3 +43,9 @@ class CatUpdate(BaseModel):
     nickname: str
     dob: datetime
     updated_at: datetime = Field(default_factory=datetime.now)
+
+
+class CatDelete(BaseModel):
+    name: str
+    is_deleted: bool
+    updated_at: datetime = Field(default_factory=datetime.now)

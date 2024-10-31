@@ -33,7 +33,13 @@ def get_cats_by_owner_email(email: str):
     user = users.get_user_by_email(email)
 
     if user:
-        query = db.query(models.Cat).filter(models.Cat.owner == user).all()
+        query = (
+            db.query(models.Cat)
+            .filter(models.Cat.owner == user)
+            .filter(models.Cat.is_deleted == False)
+            .order_by(models.Cat.name)
+            .all()
+        )
     else:
         return False
 

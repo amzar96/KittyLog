@@ -120,7 +120,7 @@ async def auth(request: Request):
     return RedirectResponse("home")
 
 
-@app.post("/add-cat", response_model=schemas.CatBase)
+@app.post("/cat", response_model=schemas.CatBase)
 async def add_cat(
     request: Request,
     cat: schemas.CatCreate,
@@ -151,7 +151,7 @@ async def add_cat(
             )
 
 
-@app.put("/update-cat", response_model=schemas.ResponseModel)
+@app.put("/cat", response_model=schemas.ResponseModel)
 async def edit_cat(
     request: Request,
     payload: schemas.CatUpdate,

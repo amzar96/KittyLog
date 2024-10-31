@@ -7,35 +7,42 @@
         <p>We're glad to see you again! Ready to track your cat's health?</p>
         <div class="ui divider"></div>
 
-        <div class="ui two column stackable grid">
+        <div class="ui two column grid">
             <div class="column">
                 <h3 class="ui header"><i class="file alternate icon"></i>Your Cats</h3>
                 <table class="ui celled table">
                     <thead>
                         <tr>
-                            <th>Name</th>
+                            <th><i class="arrow down icon"></i>Name</th>
                             <th>Nickname</th>
                             <th>Date of Birth</th>
-                            <th>Edit</th>
                         </tr>
                     </thead>
                     <tbody id="catsTableBody">
                         {% if cats %}
                         {% for cat in cats %}
                         <tr>
-                            <td>{{ cat.name }}</td>
+                            <td>
+                                <div class="ui"
+                                    data-tooltip="Created: {{ cat.created_at.strftime('%Y-%m-%d %H:%M:%S') }}"
+                                    data-position="top left">
+                                    <button class="ui button edit-cat-button" data-id="{{ cat.id }}"
+                                        data-name="{{ cat.name }}" data-nickname="{{ cat.nickname }}"
+                                        data-dob="{{ cat.dob.strftime('%Y-%m-%d') if cat.dob else '' }}">
+
+                                        {{ cat.name }}
+
+                                    </button>
+                                </div>
+                            </td>
                             <td>{{ cat.nickname }}</td>
                             <td>{{ cat.dob.strftime('%Y-%m-%d') if cat.dob else '-' }}</td>
-                            <td>
-                                <button class="ui blue button edit-cat-button" data-id="{{ cat.id }}"
-                                    data-name="{{ cat.name }}" data-nickname="{{ cat.nickname }}"
-                                    data-dob="{{ cat.dob.strftime('%Y-%m-%d') if cat.dob else '' }}">Edit</button>
-                            </td>
                         </tr>
                         {% endfor %}
                         {% endif %}
                     </tbody>
                 </table>
+                <small>* click name to edit</small>
             </div>
 
             <div class="column">
@@ -72,8 +79,8 @@
         <form class="ui form" id="updateCatForm">
             <input type="hidden" name="id" id="editCatId">
             <div class="field">
-                <label>Name</label>
-                <input type="text" name="name" id="editCatName" placeholder="Cat's Name" required>
+                <label>Name (readonly)</label>
+                <input type="text" name="name" id="editCatName" placeholder="Cat's Name" readonly>
             </div>
             <div class="field">
                 <label>Nickname</label>
@@ -118,7 +125,7 @@
         };
 
         try {
-            const response = await fetch('/add-cat', {
+            const response = await fetch('/cat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -149,7 +156,7 @@
         };
 
         try {
-            const response = await fetch('/update-cat', {
+            const response = await fetch('/cat', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
