@@ -53,6 +53,7 @@ coverage.xml
 docs/_build/
 
 .env
-alembic.ini
 *.db
 *.db-journal
+.venv/
+uv.lock
