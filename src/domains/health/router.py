@@ -18,6 +18,7 @@ from src.domains.health.schemas import (
 )
 from src.domains.health.service import HealthService
 from src.shared.models.user import User
+from src.shared.rbac import require_permission
 from src.shared.schemas.response import PaginatedResponse, ResponseModel
 from src.utils.db import get_db
 
@@ -29,12 +30,12 @@ def get_health_service(db: Session = Depends(get_db)) -> HealthService:
     return HealthService(db)
 
 
-# Weight endpoints
 @router.get("/weights", response_model=PaginatedResponse[WeightResponse])
 def list_weights(
     cat_id: str,
     user: User = Depends(get_current_user),
     service: HealthService = Depends(get_health_service),
+    _: None = Depends(require_permission("can_read", "health")),
 ):
     weights = service.list_weights(cat_id, user)
     return PaginatedResponse(data=weights, total=len(weights), page=1, page_size=len(weights))
@@ -46,6 +47,7 @@ def create_weight(
     payload: WeightCreate,
     user: User = Depends(get_current_user),
     service: HealthService = Depends(get_health_service),
+    _: None = Depends(require_permission("can_create", "health")),
 ):
     weight = service.create_weight(cat_id, payload, user)
     if not weight:
@@ -53,12 +55,12 @@ def create_weight(
     return ResponseModel(data=weight, message="Weight recorded successfully")
 
 
-# Vaccine endpoints
 @router.get("/vaccines", response_model=PaginatedResponse[VaccineResponse])
 def list_vaccines(
     cat_id: str,
     user: User = Depends(get_current_user),
     service: HealthService = Depends(get_health_service),
+    _: None = Depends(require_permission("can_read", "vaccine")),
 ):
     vaccines = service.list_vaccines(cat_id, user)
     return PaginatedResponse(data=vaccines, total=len(vaccines), page=1, page_size=len(vaccines))
@@ -70,6 +72,7 @@ def create_vaccine(
     payload: VaccineCreate,
     user: User = Depends(get_current_user),
     service: HealthService = Depends(get_health_service),
+    _: None = Depends(require_permission("can_create", "vaccine")),
 ):
     vaccine = service.create_vaccine(cat_id, payload, user)
     if not vaccine:
@@ -77,12 +80,12 @@ def create_vaccine(
     return ResponseModel(data=vaccine, message="Vaccine recorded successfully")
 
 
-# Vet visit endpoints
 @router.get("/vet-visits", response_model=PaginatedResponse[VetVisitResponse])
 def list_vet_visits(
     cat_id: str,
     user: User = Depends(get_current_user),
     service: HealthService = Depends(get_health_service),
+    _: None = Depends(require_permission("can_read", "health")),
 ):
     visits = service.list_vet_visits(cat_id, user)
     return PaginatedResponse(data=visits, total=len(visits), page=1, page_size=len(visits))
@@ -94,6 +97,7 @@ def create_vet_visit(
     payload: VetVisitCreate,
     user: User = Depends(get_current_user),
     service: HealthService = Depends(get_health_service),
+    _: None = Depends(require_permission("can_create", "health")),
 ):
     visit = service.create_vet_visit(cat_id, payload, user)
     if not visit:
@@ -101,13 +105,13 @@ def create_vet_visit(
     return ResponseModel(data=visit, message="Vet visit recorded successfully")
 
 
-# Daily health endpoints
 @router.get("/daily-health", response_model=ResponseModel[DailyHealthResponse])
 def get_daily_health(
     cat_id: str,
     log_date: datetime = Query(...),
     user: User = Depends(get_current_user),
     service: HealthService = Depends(get_health_service),
+    _: None = Depends(require_permission("can_read", "health")),
 ):
     health = service.get_daily_health(cat_id, log_date, user)
     if not health:
@@ -121,6 +125,7 @@ def create_daily_health(
     payload: DailyHealthCreate,
     user: User = Depends(get_current_user),
     service: HealthService = Depends(get_health_service),
+    _: None = Depends(require_permission("can_create", "health")),
 ):
     health = service.create_daily_health(cat_id, payload, user)
     if not health:
@@ -135,6 +140,7 @@ def update_daily_health(
     payload: DailyHealthUpdate,
     user: User = Depends(get_current_user),
     service: HealthService = Depends(get_health_service),
+    _: None = Depends(require_permission("can_edit", "health")),
 ):
     health = service.update_daily_health(cat_id, health_id, payload, user)
     if not health:

@@ -13,6 +13,7 @@ from src.domains.appointments.schemas import (
 )
 from src.domains.appointments.service import AppointmentService
 from src.shared.models.user import User
+from src.shared.rbac import require_permission
 from src.shared.schemas.response import PaginatedResponse, ResponseModel
 from src.utils.db import get_db
 
@@ -29,6 +30,7 @@ def list_appointments(
     cat_id: str,
     user: User = Depends(get_current_user),
     service: AppointmentService = Depends(get_appointment_service),
+    _: None = Depends(require_permission("can_read", "appointment")),
 ):
     appointments = service.list_appointments(cat_id, user)
     return PaginatedResponse(data=appointments, total=len(appointments), page=1, page_size=len(appointments))
@@ -40,6 +42,7 @@ def get_appointment(
     appointment_id: str,
     user: User = Depends(get_current_user),
     service: AppointmentService = Depends(get_appointment_service),
+    _: None = Depends(require_permission("can_read", "appointment")),
 ):
     appointment = service.get_appointment(cat_id, appointment_id, user)
     if not appointment:
@@ -53,6 +56,7 @@ def create_appointment(
     payload: AppointmentCreate,
     user: User = Depends(get_current_user),
     service: AppointmentService = Depends(get_appointment_service),
+    _: None = Depends(require_permission("can_create", "appointment")),
 ):
     appointment = service.create_appointment(cat_id, payload, user)
     if not appointment:
@@ -67,6 +71,7 @@ def update_appointment(
     payload: AppointmentUpdate,
     user: User = Depends(get_current_user),
     service: AppointmentService = Depends(get_appointment_service),
+    _: None = Depends(require_permission("can_edit", "appointment")),
 ):
     appointment = service.update_appointment(cat_id, appointment_id, payload, user)
     if not appointment:
@@ -80,6 +85,7 @@ def delete_appointment(
     appointment_id: str,
     user: User = Depends(get_current_user),
     service: AppointmentService = Depends(get_appointment_service),
+    _: None = Depends(require_permission("can_delete", "appointment")),
 ):
     deleted = service.delete_appointment(cat_id, appointment_id, user)
     if not deleted:
@@ -94,6 +100,7 @@ def add_reminder(
     payload: ReminderCreate,
     user: User = Depends(get_current_user),
     service: AppointmentService = Depends(get_appointment_service),
+    _: None = Depends(require_permission("can_create", "appointment")),
 ):
     reminder = service.add_reminder(cat_id, appointment_id, payload, user)
     if not reminder:

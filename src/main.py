@@ -1,15 +1,27 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 
 from src.config import settings
+from src.shared.seed import run_seed
+from src.utils.db import SessionLocal
 from src.utils.logger import setup_logging
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging()
+    db = SessionLocal()
+    try:
+        run_seed(db)
+    except Exception:
+        logger.exception("Failed to seed database")
+    finally:
+        db.close()
     yield
 
 

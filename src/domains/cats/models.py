@@ -6,6 +6,7 @@ from src.shared.models.base import Base, CoreModel
 
 class Cat(CoreModel, Base):
     __tablename__ = "cat"
+    __table_args__ = {"schema": "kittylog"}
 
     name = Column(String, nullable=False)
     nickname = Column(String, nullable=False)
@@ -14,7 +15,7 @@ class Cat(CoreModel, Base):
     gender = Column(String, nullable=True)
     color = Column(String, nullable=True)
     microchip_number = Column(String, nullable=True)
-    owner_id = Column(String, ForeignKey("users.id"), nullable=False)
+    owner_id = Column(String, ForeignKey("kittylog.users.id"), nullable=False)
 
     owner = relationship("User", back_populates="cats")
     weights = relationship("CatWeight", back_populates="cat")

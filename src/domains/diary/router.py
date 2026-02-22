@@ -7,6 +7,7 @@ from src.dependencies import get_current_user
 from src.domains.diary.schemas import DiaryEntryCreate, DiaryEntryResponse, DiaryEntryUpdate
 from src.domains.diary.service import DiaryService
 from src.shared.models.user import User
+from src.shared.rbac import require_permission
 from src.shared.schemas.response import PaginatedResponse, ResponseModel
 from src.utils.db import get_db
 from src.utils.pagination import PaginationParams, get_pagination
@@ -25,6 +26,7 @@ def list_entries(
     user: User = Depends(get_current_user),
     service: DiaryService = Depends(get_diary_service),
     pagination: PaginationParams = Depends(get_pagination),
+    _: None = Depends(require_permission("can_read", "diary")),
 ):
     entries, total = service.list_entries(cat_id, user, pagination.page, pagination.page_size)
     return PaginatedResponse(
@@ -38,6 +40,7 @@ def get_entry(
     entry_id: str,
     user: User = Depends(get_current_user),
     service: DiaryService = Depends(get_diary_service),
+    _: None = Depends(require_permission("can_read", "diary")),
 ):
     entry = service.get_entry(cat_id, entry_id, user)
     if not entry:
@@ -51,6 +54,7 @@ def create_entry(
     payload: DiaryEntryCreate,
     user: User = Depends(get_current_user),
     service: DiaryService = Depends(get_diary_service),
+    _: None = Depends(require_permission("can_create", "diary")),
 ):
     entry = service.create_entry(cat_id, payload, user)
     if not entry:
@@ -65,6 +69,7 @@ def update_entry(
     payload: DiaryEntryUpdate,
     user: User = Depends(get_current_user),
     service: DiaryService = Depends(get_diary_service),
+    _: None = Depends(require_permission("can_edit", "diary")),
 ):
     entry = service.update_entry(cat_id, entry_id, payload, user)
     if not entry:
@@ -78,6 +83,7 @@ def delete_entry(
     entry_id: str,
     user: User = Depends(get_current_user),
     service: DiaryService = Depends(get_diary_service),
+    _: None = Depends(require_permission("can_delete", "diary")),
 ):
     deleted = service.delete_entry(cat_id, entry_id, user)
     if not deleted:

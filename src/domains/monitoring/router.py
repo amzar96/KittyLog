@@ -7,6 +7,7 @@ from src.dependencies import get_current_user
 from src.domains.monitoring.schemas import ActivityLogCreate, ActivityLogResponse, CatStatusResponse
 from src.domains.monitoring.service import MonitoringService
 from src.shared.models.user import User
+from src.shared.rbac import require_permission
 from src.shared.schemas.response import PaginatedResponse, ResponseModel
 from src.utils.db import get_db
 
@@ -24,6 +25,7 @@ def list_activities(
     activity_type: str | None = Query(default=None),
     user: User = Depends(get_current_user),
     service: MonitoringService = Depends(get_monitoring_service),
+    _: None = Depends(require_permission("can_read", "monitoring")),
 ):
     activities = service.list_activities(cat_id, user, activity_type)
     return PaginatedResponse(data=activities, total=len(activities), page=1, page_size=len(activities))
@@ -35,6 +37,7 @@ def create_activity(
     payload: ActivityLogCreate,
     user: User = Depends(get_current_user),
     service: MonitoringService = Depends(get_monitoring_service),
+    _: None = Depends(require_permission("can_create", "monitoring")),
 ):
     activity = service.create_activity(cat_id, payload, user)
     if not activity:
@@ -47,6 +50,7 @@ def get_cat_status(
     cat_id: str,
     user: User = Depends(get_current_user),
     service: MonitoringService = Depends(get_monitoring_service),
+    _: None = Depends(require_permission("can_read", "monitoring")),
 ):
     cat_status = service.get_cat_status(cat_id, user)
     if not cat_status:
@@ -59,6 +63,7 @@ def list_anomalies(
     cat_id: str,
     user: User = Depends(get_current_user),
     service: MonitoringService = Depends(get_monitoring_service),
+    _: None = Depends(require_permission("can_read", "monitoring")),
 ):
     anomalies = service.list_anomalies(cat_id, user)
     return PaginatedResponse(data=anomalies, total=len(anomalies), page=1, page_size=len(anomalies))

@@ -1,13 +1,15 @@
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import engine_from_config, pool, text
 
 from src.config import settings
 from src.shared.models.base import Base
 
 # Register all models for autogenerate support
 from src.shared.models import user  # noqa: F401
+from src.shared.models import rbac  # noqa: F401
+from src.shared.models import subscription  # noqa: F401
 from src.domains.cats import models as cats_models  # noqa: F401
 from src.domains.health import models as health_models  # noqa: F401
 from src.domains.nutrition import models as nutrition_models  # noqa: F401
@@ -21,9 +23,17 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", settings.SUPABASE_DB_URL)
+config.set_main_option("sqlalchemy.url", settings.SUPABASE_DB_URL.replace("%", "%%"))
 
 target_metadata = Base.metadata
+
+MANAGED_SCHEMAS = {"kittylog"}
+
+
+def include_name(name, type_, parent_names):
+    if type_ == "schema":
+        return name in MANAGED_SCHEMAS
+    return True
 
 
 def run_migrations_offline() -> None:
@@ -33,6 +43,9 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        version_table_schema="kittylog",
+        include_schemas=True,
+        include_name=include_name,
     )
 
     with context.begin_transaction():
@@ -47,7 +60,16 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        connection.execute(text("CREATE SCHEMA IF NOT EXISTS kittylog"))
+        connection.commit()
+
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            version_table_schema="kittylog",
+            include_schemas=True,
+            include_name=include_name,
+        )
 
         with context.begin_transaction():
             context.run_migrations()

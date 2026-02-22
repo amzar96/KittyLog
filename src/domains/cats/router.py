@@ -7,6 +7,7 @@ from src.dependencies import get_current_user
 from src.domains.cats.schemas import CatCreate, CatResponse, CatUpdate
 from src.domains.cats.service import CatService
 from src.shared.models.user import User
+from src.shared.rbac import require_permission
 from src.shared.schemas.response import PaginatedResponse, ResponseModel
 from src.utils.db import get_db
 
@@ -22,6 +23,7 @@ def get_cat_service(db: Session = Depends(get_db)) -> CatService:
 def list_cats(
     user: User = Depends(get_current_user),
     service: CatService = Depends(get_cat_service),
+    _: None = Depends(require_permission("can_read", "cat")),
 ):
     cats = service.get_cats_by_owner(user)
     return PaginatedResponse(data=cats, total=len(cats), page=1, page_size=len(cats))
@@ -32,6 +34,7 @@ def get_cat(
     cat_id: str,
     user: User = Depends(get_current_user),
     service: CatService = Depends(get_cat_service),
+    _: None = Depends(require_permission("can_read", "cat")),
 ):
     cat = service.get_cat_by_id(cat_id, user)
     if not cat:
@@ -44,6 +47,7 @@ def create_cat(
     payload: CatCreate,
     user: User = Depends(get_current_user),
     service: CatService = Depends(get_cat_service),
+    _: None = Depends(require_permission("can_create", "cat")),
 ):
     try:
         cat = service.create_cat(payload, user)
@@ -58,6 +62,7 @@ def update_cat(
     payload: CatUpdate,
     user: User = Depends(get_current_user),
     service: CatService = Depends(get_cat_service),
+    _: None = Depends(require_permission("can_edit", "cat")),
 ):
     cat = service.update_cat(cat_id, payload, user)
     if not cat:
@@ -70,6 +75,7 @@ def delete_cat(
     cat_id: str,
     user: User = Depends(get_current_user),
     service: CatService = Depends(get_cat_service),
+    _: None = Depends(require_permission("can_delete", "cat")),
 ):
     deleted = service.delete_cat(cat_id, user)
     if not deleted:

@@ -13,6 +13,7 @@ from src.domains.nutrition.schemas import (
 )
 from src.domains.nutrition.service import NutritionService
 from src.shared.models.user import User
+from src.shared.rbac import require_permission
 from src.shared.schemas.response import PaginatedResponse, ResponseModel
 from src.utils.db import get_db
 
@@ -29,6 +30,7 @@ def list_supplies(
     cat_id: str,
     user: User = Depends(get_current_user),
     service: NutritionService = Depends(get_nutrition_service),
+    _: None = Depends(require_permission("can_read", "nutrition")),
 ):
     supplies = service.list_supplies(cat_id, user)
     return PaginatedResponse(data=supplies, total=len(supplies), page=1, page_size=len(supplies))
@@ -40,6 +42,7 @@ def create_supply(
     payload: SupplyItemCreate,
     user: User = Depends(get_current_user),
     service: NutritionService = Depends(get_nutrition_service),
+    _: None = Depends(require_permission("can_create", "nutrition")),
 ):
     item = service.create_supply(cat_id, payload, user)
     if not item:
@@ -54,6 +57,7 @@ def update_supply(
     payload: SupplyItemUpdate,
     user: User = Depends(get_current_user),
     service: NutritionService = Depends(get_nutrition_service),
+    _: None = Depends(require_permission("can_edit", "nutrition")),
 ):
     item = service.update_supply(cat_id, supply_id, payload, user)
     if not item:
@@ -68,6 +72,7 @@ def add_stock(
     payload: StockLogCreate,
     user: User = Depends(get_current_user),
     service: NutritionService = Depends(get_nutrition_service),
+    _: None = Depends(require_permission("can_create", "nutrition")),
 ):
     log = service.add_stock(cat_id, supply_id, payload, user)
     if not log:
@@ -80,6 +85,7 @@ def get_low_stock_alerts(
     cat_id: str,
     user: User = Depends(get_current_user),
     service: NutritionService = Depends(get_nutrition_service),
+    _: None = Depends(require_permission("can_read", "nutrition")),
 ):
     items = service.get_low_stock_alerts(cat_id, user)
     return PaginatedResponse(data=items, total=len(items), page=1, page_size=len(items))

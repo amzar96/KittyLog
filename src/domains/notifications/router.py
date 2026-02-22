@@ -11,6 +11,7 @@ from src.domains.notifications.schemas import (
 )
 from src.domains.notifications.service import NotificationService
 from src.shared.models.user import User
+from src.shared.rbac import require_permission
 from src.shared.schemas.response import PaginatedResponse, ResponseModel
 from src.utils.db import get_db
 
@@ -26,6 +27,7 @@ def get_notification_service(db: Session = Depends(get_db)) -> NotificationServi
 def list_notifications(
     user: User = Depends(get_current_user),
     service: NotificationService = Depends(get_notification_service),
+    _: None = Depends(require_permission("can_read", "notification")),
 ):
     notifications = service.list_notifications(user)
     return PaginatedResponse(data=notifications, total=len(notifications), page=1, page_size=len(notifications))
@@ -36,6 +38,7 @@ def mark_as_read(
     notification_id: str,
     user: User = Depends(get_current_user),
     service: NotificationService = Depends(get_notification_service),
+    _: None = Depends(require_permission("can_edit", "notification")),
 ):
     notification = service.mark_as_read(notification_id, user)
     if not notification:
@@ -47,6 +50,7 @@ def mark_as_read(
 def get_preferences(
     user: User = Depends(get_current_user),
     service: NotificationService = Depends(get_notification_service),
+    _: None = Depends(require_permission("can_read", "notification")),
 ):
     pref = service.get_preferences(user)
     return ResponseModel(data=pref, message="success")
@@ -57,6 +61,7 @@ def update_preferences(
     payload: NotificationPreferenceUpdate,
     user: User = Depends(get_current_user),
     service: NotificationService = Depends(get_notification_service),
+    _: None = Depends(require_permission("can_edit", "notification")),
 ):
     pref = service.update_preferences(user, payload)
     return ResponseModel(data=pref, message="Preferences updated successfully")
