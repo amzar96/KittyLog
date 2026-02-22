@@ -39,7 +39,8 @@ async def callback(request: Request, db: Session = Depends(get_db)):
         )
 
     user = service.get_or_create_user(db, userinfo)
-    request.session["user"] = {"email": user.email, "name": user.full_name}
+    profile = service.get_user_profile(db, user)
+    request.session["user"] = profile
 
     return RedirectResponse(url=settings.FRONTEND_URL)
 

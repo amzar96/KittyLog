@@ -80,6 +80,33 @@ def _assign_default_role(db: Session, user: User) -> None:
     logger.info("Assigned role '%s' to user %s", role.name, user.email)
 
 
+def get_user_profile(db: Session, user: User) -> dict:
+    subscription = db.query(UserSubscription).filter(
+        UserSubscription.user_id == user.id,
+        UserSubscription.is_deleted == False,  # noqa: E712
+    ).first()
+
+    plan_name = None
+    subscription_status = None
+    subscription_started_at = None
+    if subscription:
+        plan = db.query(Plan).filter(Plan.id == subscription.plan_id).first()
+        plan_name = plan.name if plan else None
+        subscription_status = subscription.status
+        subscription_started_at = subscription.started_at.isoformat() if subscription.started_at else None
+
+    return {
+        "id": user.id,
+        "email": user.email,
+        "name": user.full_name,
+        "picture": user.picture_url,
+        "plan": plan_name,
+        "subscription_status": subscription_status,
+        "subscription_started_at": subscription_started_at,
+        "registered_at": user.created_at.isoformat() if user.created_at else None,
+    }
+
+
 def _assign_free_plan(db: Session, user: User) -> None:
     plan = db.query(Plan).filter(
         Plan.name == "free",
