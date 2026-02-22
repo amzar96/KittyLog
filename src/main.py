@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from src.config import settings
@@ -35,6 +36,13 @@ def create_app() -> FastAPI:
     )
 
     app.add_middleware(SessionMiddleware, secret_key=settings.SESSION_SECRET_KEY)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[settings.FRONTEND_URL],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     from src.domains.auth.router import router as auth_router
     from src.domains.cats.router import router as cats_router

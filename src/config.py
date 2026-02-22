@@ -32,6 +32,8 @@ class Settings(BaseSettings):
 
     DB_SCHEMA: str = Field(default="kittylog")
 
+    FRONTEND_URL: str = "http://localhost:5173" # TODO: make this configurable
+
     SUPABASE_URL: str = ""
     SUPABASE_SERVICE_KEY: str = ""
 

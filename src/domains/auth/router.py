@@ -2,10 +2,11 @@ import logging
 
 from authlib.integrations.starlette_client import OAuthError
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
+from src.config import settings
 from src.domains.auth import service
-from src.domains.auth.schemas import AuthResponse
 from src.integrations.oauth import oauth
 from src.utils.db import get_db
 
@@ -40,10 +41,7 @@ async def callback(request: Request, db: Session = Depends(get_db)):
     user = service.get_or_create_user(db, userinfo)
     request.session["user"] = {"email": user.email, "name": user.full_name}
 
-    return AuthResponse(
-        message="authenticated",
-        user={"email": user.email, "name": user.full_name},
-    )
+    return RedirectResponse(url=settings.FRONTEND_URL)
 
 
 @router.get("/logout")
