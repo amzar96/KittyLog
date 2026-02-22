@@ -30,6 +30,8 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("SUPABASE_DB_URL", "DB_URL"),
     )
 
+    DB_SCHEMA: str = Field(default="kittylog")
+
     SUPABASE_URL: str = ""
     SUPABASE_SERVICE_KEY: str = ""
 

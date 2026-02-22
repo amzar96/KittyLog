@@ -27,7 +27,7 @@ config.set_main_option("sqlalchemy.url", settings.SUPABASE_DB_URL.replace("%", "
 
 target_metadata = Base.metadata
 
-MANAGED_SCHEMAS = {"kittylog"}
+MANAGED_SCHEMAS = {settings.DB_SCHEMA}
 
 
 def include_name(name, type_, parent_names):
@@ -43,7 +43,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        version_table_schema="kittylog",
+        version_table_schema=settings.DB_SCHEMA,
         include_schemas=True,
         include_name=include_name,
     )
@@ -66,7 +66,7 @@ def run_migrations_online() -> None:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            version_table_schema="kittylog",
+            version_table_schema=settings.DB_SCHEMA,
             include_schemas=True,
             include_name=include_name,
         )

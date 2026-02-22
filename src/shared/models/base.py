@@ -1,12 +1,14 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, Column, DateTime, String
+from sqlalchemy import Boolean, Column, DateTime, MetaData, String
 from sqlalchemy.orm import DeclarativeBase
+
+from src.config import settings
 
 
 class Base(DeclarativeBase):
-    pass
+    metadata = MetaData(schema=settings.DB_SCHEMA)
 
 
 class CoreModel:

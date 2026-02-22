@@ -6,7 +6,6 @@ from src.shared.models.base import Base, CoreModel
 
 class ActivityLog(CoreModel, Base):
     __tablename__ = "activitylog"
-    __table_args__ = {"schema": "kittylog"}
 
     activity_type = Column(String, nullable=False)  # meal, litter, medicine, play
     logged_at = Column(DateTime, nullable=False)
@@ -14,6 +13,6 @@ class ActivityLog(CoreModel, Base):
     notes = Column(String, nullable=True)
     is_anomaly = Column(Boolean, default=False)
     anomaly_reason = Column(String, nullable=True)
-    cat_id = Column(String, ForeignKey("kittylog.cat.id"), nullable=False)
+    cat_id = Column(String, ForeignKey("cat.id"), nullable=False)
 
     cat = relationship("Cat")

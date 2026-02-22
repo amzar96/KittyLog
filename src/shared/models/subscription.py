@@ -6,7 +6,6 @@ from src.shared.models.base import Base, CoreModel
 
 class Plan(CoreModel, Base):
     __tablename__ = "plan"
-    __table_args__ = {"schema": "kittylog"}
 
     name = Column(String, unique=True, nullable=False, index=True)
     description = Column(String, nullable=True)
@@ -20,11 +19,10 @@ class PlanPermission(CoreModel, Base):
     __tablename__ = "plan_permission"
     __table_args__ = (
         UniqueConstraint("plan_id", "permission_id", name="uq_plan_permission"),
-        {"schema": "kittylog"},
     )
 
-    plan_id = Column(String, ForeignKey("kittylog.plan.id"), nullable=False)
-    permission_id = Column(String, ForeignKey("kittylog.permission.id"), nullable=False)
+    plan_id = Column(String, ForeignKey("plan.id"), nullable=False)
+    permission_id = Column(String, ForeignKey("permission.id"), nullable=False)
 
     plan = relationship("Plan", back_populates="permissions")
     permission = relationship("Permission")
@@ -32,10 +30,9 @@ class PlanPermission(CoreModel, Base):
 
 class UserSubscription(CoreModel, Base):
     __tablename__ = "user_subscription"
-    __table_args__ = {"schema": "kittylog"}
 
-    user_id = Column(String, ForeignKey("kittylog.users.id"), nullable=False)
-    plan_id = Column(String, ForeignKey("kittylog.plan.id"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    plan_id = Column(String, ForeignKey("plan.id"), nullable=False)
     status = Column(String, default="active", nullable=False)
     started_at = Column(DateTime, nullable=True)
     expires_at = Column(DateTime, nullable=True)
